@@ -2,13 +2,14 @@
 FROM registry.cloudogu.com/official/base:3.5-2
 MAINTAINER Sebastian Sdorra <sebastian.sdorra@cloudogu.com>
 
-ENV CES_CONFD_VERSION=0.1.4 \
-    WARP_MENU_VERSION=0.1.0 \
+ENV CES_CONFD_VERSION=0.2.0 \
+    WARP_MENU_VERSION=0.2.0 \
     CES_THEME_VERSION=bcf04bab10a6bf534a7167a92315cd917de7bcb7
 
-COPY resources resources
-
-RUN apk --update add openssl pcre zlib \
+COPY test test
+RUN set -x \
+ # install required packages
+ && apk --update add openssl pcre zlib \
  # add nginx user
  && adduser nginx -D \
 
@@ -19,9 +20,8 @@ RUN apk --update add openssl pcre zlib \
  && mkdir -p /var/www/html \
 
  # install warp menu
- # the two following lines are commented out for test reasons
-# && curl -Lsk https://github.com/cloudogu/warp-menu/releases/download/v${WARP_MENU_VERSION}/warp-v${WARP_MENU_VERSION}.zip -o /tmp/warp.zip \
-# && unzip /tmp/warp.zip -d /var/www/html \
+ #&& curl -Lsk https://github.com/cloudogu/warp-menu/releases/download/v${WARP_MENU_VERSION}/warp-v${WARP_MENU_VERSION}.zip -o /tmp/warp.zip \
+ #&& unzip /tmp/warp.zip -d /var/www/html \
 
  # install custom error pages
  && curl -Lsk https://github.com/cloudogu/ces-theme/archive/${CES_THEME_VERSION}.zip -o /tmp/theme.zip \
@@ -30,16 +30,9 @@ RUN apk --update add openssl pcre zlib \
  && mv /tmp/theme/ces-theme-*/dist/errors/* /var/www/html/errors \
  && rm -rf /tmp/theme.zip /tmp/theme \
 
- # install about page
- # next lines are commented out for test reasons and since repository is private and it is not able to download that private repository
- #&& curl -Lsk https://github.com/cloudogu/ces-about/archive/master.zip -o /tmp/about.zip \
- #&& mkdir -p /var/www/html/info \
- #&& unzip /tmp/about.zip -d /var/www/html/info \
- #&& rm -rf /tmp/about.zip \
-
- # for test reasons (about page repository is private, so sources cannot get from repository; warp menu has to be released before getting it from repository
- && mv resources/* var/www/html \
-
+&& mkdir -p /var/www/html/info \
+ && mv test/info/* var/www/html/info \
+ && mv test/warp var/www/html \
  # redirect logs
  && ln -sf /dev/stdout /var/log/nginx/access.log \
  && ln -sf /dev/stderr /var/log/nginx/error.log \
@@ -49,11 +42,11 @@ RUN apk --update add openssl pcre zlib \
 
 # copy files
 COPY dist/nginx /usr/sbin/nginx
-COPY etc/nginx /etc/nginx
-COPY etc/ces-confd /etc/ces-confd
-COPY startup.sh /startup.sh
+COPY resources /
+
 
 # Define mountable directories.
+# TODO check if any of the volumes are required
 VOLUME ["/etc/nginx/conf.d", "/var/log/nginx", "/var/www/html"]
 
 # Define working directory.
