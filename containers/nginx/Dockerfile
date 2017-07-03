@@ -20,6 +20,7 @@ RUN set -x \
  && mkdir -p /var/www/html \
 
  # install warp menu
+  # the two following lines are commented out for test reasons
  #&& curl -Lsk https://github.com/cloudogu/warp-menu/releases/download/v${WARP_MENU_VERSION}/warp-v${WARP_MENU_VERSION}.zip -o /tmp/warp.zip \
  #&& unzip /tmp/warp.zip -d /var/www/html \
 
@@ -30,9 +31,18 @@ RUN set -x \
  && mv /tmp/theme/ces-theme-*/dist/errors/* /var/www/html/errors \
  && rm -rf /tmp/theme.zip /tmp/theme \
 
+#for test reasons
 && mkdir -p /var/www/html/info \
  && mv test/info/* var/www/html/info \
  && mv test/warp var/www/html \
+
+ # install about page
+ # next lines are commented out for test reasons and since repository is private and it is not able to download that private repository
+ #&& curl -Lsk https://github.com/cloudogu/ces-about/archive/master.zip -o /tmp/about.zip \
+ #&& mkdir -p /var/www/html/info \
+ #&& unzip /tmp/about.zip -d /var/www/html/info \
+ #&& rm -rf /tmp/about.zip \
+
  # redirect logs
  && ln -sf /dev/stdout /var/log/nginx/access.log \
  && ln -sf /dev/stderr /var/log/nginx/error.log \
